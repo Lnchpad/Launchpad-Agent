@@ -1,0 +1,27 @@
+version: "3.3"
+services:
+  zookeeper:
+    image: confluent/zookeeper:latest
+    ports:
+      - 2181:2181
+  kafka:
+    image: confluent/kafka:latest
+    links:
+      - zookeeper
+    ports:
+      - 9092:9092
+  schema-registry:
+    image: confluent/schema-registry:latest
+    links:
+      - zookeeper
+      - kafka
+    ports:
+      - 8081:8081
+  rest-proxy:
+    image: confluent/rest-proxy:latest
+    links:
+      - zookeeper
+      - kafka
+      - schema-registry
+    ports:
+      - 8082:8082
