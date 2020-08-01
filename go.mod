@@ -3,7 +3,7 @@ module cjavellana.me/launchpad/agent
 go 1.14
 
 require (
-	github.com/confluentinc/confluent-kafka-go v1.4.2 // indirect
+	github.com/confluentinc/confluent-kafka-go v1.4.2
 	github.com/gizak/termui v3.1.0+incompatible // indirect
 	github.com/go-yaml/yaml v2.1.0+incompatible
 	github.com/mum4k/termdash v0.12.1

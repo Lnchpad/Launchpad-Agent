@@ -1,4 +1,4 @@
-package nginx
+package metrics
 
 import (
 	"reflect"
@@ -12,7 +12,7 @@ func Test_parseStandardStatus(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want StandardStatus
+		want NginxStatus
 	}{
 		{"itShouldReturnNginxStatus",
 			args{`Active connections: 1
@@ -20,7 +20,7 @@ func Test_parseStandardStatus(t *testing.T) {
  10 10 10
  Reading: 0 Writing: 1 Waiting: 0
  `},
-			StandardStatus{
+			NginxStatus{
 				1,
 				10,
 				10,

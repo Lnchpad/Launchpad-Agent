@@ -3,7 +3,6 @@ package main
 import (
 	"cjavellana.me/launchpad/agent/errors"
 	"cjavellana.me/launchpad/agent/metrics"
-	"cjavellana.me/launchpad/agent/servers/nginx"
 	"fmt"
 	"github.com/mum4k/termdash/cell"
 	"github.com/mum4k/termdash/widgets/linechart"
@@ -67,7 +66,7 @@ func NewRollContentDisplay(fn render) *text.Text {
 	return display
 }
 
-func NewNginxStatusWindow(ch chan nginx.StandardStatus) *text.Text  {
+func NewNginxStatusWindow(ch chan metrics.NginxStatus) *text.Text  {
 	return NewRollContentDisplay(
 		func(display *text.Text) {
 			for {
@@ -81,7 +80,7 @@ func NewNginxStatusWindow(ch chan nginx.StandardStatus) *text.Text  {
 		})
 }
 
-func messageFrom(n nginx.StandardStatus) string {
+func messageFrom(n metrics.NginxStatus) string {
 	message := n.RawData
 	if n.ErrorMessage != "" {
 		message = n.ErrorMessage

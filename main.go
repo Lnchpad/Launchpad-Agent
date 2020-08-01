@@ -24,7 +24,8 @@ type StartUpArgs struct {
 func main() {
 	args := parseArgs()
 
-	server := GetServerConfigFrom(args.config)
+	appCfg := GetServerConfigFrom(args.config)
+	server := &appCfg.Server
 
 	serverStartChannel := make(chan os.Process)
 	go startServer(server, serverStartChannel)
@@ -39,15 +40,15 @@ func main() {
 		outChannel := make(chan string)
 		stdout.TailStdout(outChannel)
 
-		cpuObserver := metrics.NewCpuObserver(1 * time.Second)
-		memObserver := metrics.NewMemoryObserver(1 * time.Second)
-		nginxObserver := nginx.NewStatusObserver(
+		cpuObserver := metrics.NewCpuProbe(1 * time.Second)
+		memObserver := metrics.NewMemoryProbe(1 * time.Second)
+		nginxObserver := metrics.NewNginxProbe(
 			server.Monitor.MonitoringUrl,
 			time.Duration(server.Monitor.PollingIntervalSecs) * time.Second,
 			time.Duration(server.Monitor.InitialDelaySecs) * time.Second,
 			)
 
-		observers := []metrics.Observable{cpuObserver, memObserver, nginxObserver}
+		observers := []metrics.Probe{cpuObserver, memObserver, nginxObserver}
 		metrics.Observe(observers)
 
 		// The Dashboard View
