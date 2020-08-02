@@ -2,9 +2,13 @@ package main
 
 import (
 	"cjavellana.me/launchpad/agent/errors"
+	"cjavellana.me/launchpad/agent/events/publishers"
+	"cjavellana.me/launchpad/agent/messaging"
 	"cjavellana.me/launchpad/agent/metrics"
 	"cjavellana.me/launchpad/agent/os"
 	"cjavellana.me/launchpad/agent/servers/nginx"
+	"cjavellana.me/launchpad/agent/view"
+	"cjavellana.me/launchpad/agent/view/widgets"
 	"context"
 	"flag"
 	"github.com/mum4k/termdash"
@@ -36,37 +40,69 @@ func main() {
 		ctx, _ := context.WithCancel(context.Background())
 
 		// we start the tailer here that will Observe the nginx stdout
-		// for build content
-		outChannel := make(chan string)
-		stdout.TailStdout(outChannel)
+		// for Build content
+		logsChannel := make(chan string)
+		stdout.TailStdout(logsChannel)
 
-		cpuObserver := metrics.NewCpuProbe(1 * time.Second)
-		memObserver := metrics.NewMemoryProbe(1 * time.Second)
-		nginxObserver := metrics.NewNginxProbe(
+		cpuProbe := metrics.NewCpuProbe(1 * time.Second)
+		memProbe := metrics.NewMemoryProbe(1 * time.Second)
+		nginxProbe := metrics.NewNginxProbe(
 			server.Monitor.MonitoringUrl,
-			time.Duration(server.Monitor.PollingIntervalSecs) * time.Second,
-			time.Duration(server.Monitor.InitialDelaySecs) * time.Second,
-			)
+			time.Duration(server.Monitor.PollingIntervalSecs)*time.Second,
+			time.Duration(server.Monitor.InitialDelaySecs)*time.Second,
+		)
 
-		observers := []metrics.Probe{cpuObserver, memObserver, nginxObserver}
+		observers := []metrics.Probe{cpuProbe, memProbe, nginxProbe}
 		metrics.Observe(observers)
+
+		// Get Kafka Producer
+		broker := messaging.NewKafkaBroker(appCfg.Messaging)
+		metricsPublisher := publishers.NewMetricsPublisher(broker.NewProducer())
 
 		// The Dashboard View
 		t, err := termbox.New()
 		errors.CheckFatal(err)
 		defer t.Close()
 
-		stdoutWidget := NewServerStdoutWindow(outChannel)
-		nginxMetricsWidget := NewNginxStatusWindow(nginxObserver.Channel)
-		cpuMetricsWidget := NewLineChart(cpuObserver.Channel, 15, time.Second)
-		memoryMetricsWidget := NewLineChart(memObserver.MetricsChannel, 15, time.Second)
+		stdoutWidget := widgets.NewRollContentDisplay()
+		nginxMetricsWidget := widgets.NewRollContentDisplay()
+		cpuMetricsWidget := widgets.NewLineChart(15, time.Second)
+		memoryMetricsWidget := widgets.NewLineChart(15, time.Second)
 
-		dashboard := StandardDashboardBuilder(t).
-			WithCpuWidget(cpuMetricsWidget).
-			WithMemoryWidget(memoryMetricsWidget).
-			WithStdoutWidget(stdoutWidget).
-			WithNginxMetrics(nginxMetricsWidget).
-			build()
+		// Metrics Dispatcher
+		go func(c *metrics.CpuProbe, m *metrics.MemoryProbe, out chan string, n *metrics.NginxProbe) {
+			for {
+				select {
+				case cpu := <-c.MetricsChannel:
+					cpuMetricsWidget.AddElement(cpu)
+
+					if err := metricsPublisher.PublishCpuMetrics(cpu); err != nil {
+						log.Println(err)
+					}
+				case mem := <-m.MetricsChannel:
+					memoryMetricsWidget.AddElement(mem)
+				case logs := <-out:
+					stdoutWidget.Update(logs)
+
+					if err := metricsPublisher.PublishServerLogs(logs); err != nil {
+						log.Println(err)
+					}
+				case stat := <-n.StatsChannel:
+					message := stat.RawData
+					if stat.ErrorMessage != "" {
+						message = stat.ErrorMessage
+					}
+					nginxMetricsWidget.Update(message)
+				}
+			}
+		}(cpuProbe, memProbe, logsChannel, nginxProbe)
+
+		dashboard := view.SimpleDashboardBuilder().
+			WithCpuWidget(cpuMetricsWidget.LineChart).
+			WithMemoryWidget(memoryMetricsWidget.LineChart).
+			WithStdoutWidget(stdoutWidget.Display).
+			WithNginxMetrics(nginxMetricsWidget.Display).
+			Build(t)
 
 		if err := termdash.Run(ctx, t, dashboard); err != nil {
 			panic(err)

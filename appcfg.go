@@ -10,7 +10,15 @@ import (
 	"io/ioutil"
 )
 
+type DashboardType string
+
+const (
+	simple DashboardType = "simple"
+	none = "none"
+)
+
 type AppConfig struct {
+	DashboardType DashboardType
 	Server    nginx.Server
 	Messaging messaging.KafkaConfig
 }

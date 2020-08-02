@@ -1,43 +1,62 @@
 package publishers
 
 import (
+	"cjavellana.me/launchpad/agent/messaging/protobuf"
 	"cjavellana.me/launchpad/agent/metrics"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"log"
+	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/ptypes"
 )
+
+var cpuMetricsTopic = "launchpad.agent.cpu"
+var logsTopic = "launchpad.agent.logs"
 
 type MetricsPublisher struct {
 	producer *kafka.Producer
 }
 
-func NewMetricsPublisher(k *kafka.Producer) *MetricsPublisher  {
+func NewMetricsPublisher(k *kafka.Producer) *MetricsPublisher {
 	return &MetricsPublisher{producer: k}
 }
 
-func (m *MetricsPublisher) PublishCpuMetrics(ch chan metrics.Metrics) {
-}
+func (m *MetricsPublisher) PublishServerLogs(logs string) error {
+	simpleLog := &protobuf.SimpleLog{Timestamp: ptypes.TimestampNow(), Message: logs}
+	if simpleLogAsBytes, err := proto.Marshal(simpleLog); err != nil {
+		return err
+	} else {
+		err := m.producer.Produce(&kafka.Message{
+			TopicPartition: kafka.TopicPartition{Topic: &logsTopic, Partition: kafka.PartitionAny},
+			Value:          simpleLogAsBytes,
+		}, nil)
 
-func (m *MetricsPublisher) PublishMemoryMetrics(ch chan metrics.Metrics)  {
-}
-
-func (m *MetricsPublisher) PublishNginxStatus(ch chan metrics.NginxStatus) {
-}
-
-func (m *MetricsPublisher) PublishServerLogs(ch chan string) {
-	topic := "launchpad.agent.logs"
-
-	go func() {
-		for {
-			msg := <- ch
-			err := m.producer.Produce(&kafka.Message{
-				TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-				Value: []byte(msg),
-			}, nil)
-
-			if err != nil {
-				log.Print(err)
-			}
+		if err != nil {
+			return err
 		}
-	}()
+	}
+
+	return nil
 }
 
+func (m *MetricsPublisher) PublishCpuMetrics(cpu metrics.Metrics) error {
+	cpuMetrics := protobuf.Metrics{
+		Timestamp: ptypes.TimestampNow(),
+		Type: string(cpu.Type),
+		Label: cpu.Label,
+		Value: float32(cpu.Value),
+	}
+
+	metricsAsBytes, err := proto.Marshal(&cpuMetrics)
+	if err != nil {
+		return err
+	}
+
+	err = m.producer.Produce(&kafka.Message{
+		TopicPartition: kafka.TopicPartition{Topic: &cpuMetricsTopic, Partition: kafka.PartitionAny},
+		Value:          metricsAsBytes,
+	}, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -30,7 +30,12 @@ func (m *MemoryProbe) Observe() {
 			}
 
 			v, _ := mem.VirtualMemory()
-			m.MetricsChannel <- Metrics{Label: "Memory Utilization", Value: v.UsedPercent}
+			m.MetricsChannel <- Metrics{
+				Timestamp: time.Now(),
+				Type: TypeMemory,
+				Label: "Memory Utilization",
+				Value: v.UsedPercent,
+			}
 			time.Sleep(m.SamplingInterval)
 		}
 	}()

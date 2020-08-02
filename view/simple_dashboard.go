@@ -1,4 +1,4 @@
-package main
+package view
 
 import (
 	"github.com/mum4k/termdash/container"
@@ -8,39 +8,38 @@ import (
 	"github.com/mum4k/termdash/widgets/text"
 )
 
-type StandardDashboard struct {
-	terminal    *termbox.Terminal
+type SimpleDashboard struct {
 	cpuUsage    *linechart.LineChart
 	memoryUsage *linechart.LineChart
 	serverLog   *text.Text
 	agentLog    *text.Text
 }
 
-func StandardDashboardBuilder(terminal *termbox.Terminal) *StandardDashboard {
-	return &StandardDashboard{terminal: terminal}
+func SimpleDashboardBuilder() *SimpleDashboard {
+	return &SimpleDashboard{}
 }
 
-func (d *StandardDashboard) WithCpuWidget(chart *linechart.LineChart) *StandardDashboard {
+func (d *SimpleDashboard) WithCpuWidget(chart *linechart.LineChart) *SimpleDashboard {
 	d.cpuUsage = chart
 	return d
 }
 
-func (d *StandardDashboard) WithMemoryWidget(chart *linechart.LineChart) *StandardDashboard {
+func (d *SimpleDashboard) WithMemoryWidget(chart *linechart.LineChart) *SimpleDashboard {
 	d.memoryUsage = chart
 	return d
 }
 
-func (d *StandardDashboard) WithStdoutWidget(stdout *text.Text) *StandardDashboard {
+func (d *SimpleDashboard) WithStdoutWidget(stdout *text.Text) *SimpleDashboard {
 	d.serverLog = stdout
 	return d
 }
 
-func (d *StandardDashboard) WithNginxMetrics(nginxMetrics *text.Text) *StandardDashboard {
+func (d *SimpleDashboard) WithNginxMetrics(nginxMetrics *text.Text) *SimpleDashboard {
 	d.agentLog = nginxMetrics
 	return d
 }
 
-func (d *StandardDashboard) build() *container.Container {
+func (d *SimpleDashboard) Build(terminal *termbox.Terminal) *container.Container {
 	cpuWidget := make([]container.Option, 0, 3)
 	cpuWidget = append(cpuWidget,
 		container.Border(linestyle.Light),
@@ -70,7 +69,7 @@ func (d *StandardDashboard) build() *container.Container {
 	)
 
 	c, err := container.New(
-		d.terminal,
+		terminal,
 		container.Border(linestyle.Light),
 		container.BorderTitle("Launchpad WebServer Agent"),
 		container.SplitVertical(

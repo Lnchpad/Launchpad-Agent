@@ -21,11 +21,21 @@ In order to minimize the footprint of this agent on the webserver a programming 
 
 ## Getting Started
 
+1. [See Compiling Protocol Buffers](https://developers.google.com/protocol-buffers/docs/gotutorial#compiling-your-protocol-buffers)
+
+2. Generating Protobuf Stubs
+
+    ```bash
+    $ protoc -I=./launchpad-schema -I=./launchpad-schema/include --go_out=./launchpad-agent launchpad-schema/metrics.proto
+    ```
+
+## Usage
+
+## Troubleshooting
+
 ### MacOS
 Stop "developer tools access needs to take control of another process for debugging to continue" alert
 
 ```bash
 $ sudo /usr/sbin/DevToolsSecurity --enable
 ```
-
-## Usage

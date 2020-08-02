@@ -10,7 +10,7 @@ import (
 )
 
 type Config struct {
-	Template     string
+	Template string
 
 	// the location are where pages are served
 	RootDir      string
@@ -63,9 +63,10 @@ func (n *Server) createOrUpdateConfigFile() error {
 }
 
 func (n *Server) getCmd() *exec.Cmd {
-	if n.NginxPath == "local" {
+	switch n.NginxPath {
+	case "local":
 		return exec.Command("tail", "-f", "/tmp/sample.txt")
+	default:
+		return exec.Command(n.NginxPath, "-c", n.Config.Location)
 	}
-
-	return exec.Command(n.NginxPath, "-c", n.Config.Location)
 }

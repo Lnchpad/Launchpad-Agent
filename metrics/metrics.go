@@ -1,7 +1,17 @@
 package metrics
 
-type Metrics struct {
-	Label string
-	Value float64
-}
+import "time"
 
+type Type string
+
+const (
+	TypeCpu    Type = "cpu"
+	TypeMemory      = "mem"
+)
+
+type Metrics struct {
+	Timestamp time.Time
+	Type      Type
+	Label     string
+	Value     float64
+}

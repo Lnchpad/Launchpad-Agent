@@ -18,6 +18,7 @@ import (
 // 8 8 8
 // Reading: 0 Writing: 1 Waiting: 0
 type NginxStatus struct {
+	Timestamp         time.Time
 	ActiveConnections uint8
 	Accepted          uint8
 	Handled           uint8
@@ -35,7 +36,7 @@ type NginxProbe struct {
 	SamplingInterval time.Duration
 
 	// The channel with which metrics will be transmitted
-	Channel chan NginxStatus
+	StatsChannel chan NginxStatus
 
 	// a delay to prevent probing the server before it has fully started
 	InitialDelay time.Duration
@@ -48,7 +49,7 @@ func NewNginxProbe(statusUrl string, samplingInterval time.Duration, initialDela
 	return &NginxProbe{
 		StatusUrl:        statusUrl,
 		SamplingInterval: samplingInterval,
-		Channel:          make(chan NginxStatus),
+		StatsChannel:     make(chan NginxStatus),
 		InitialDelay:     initialDelay,
 	}
 }
@@ -69,9 +70,9 @@ func (s *NginxProbe) Observe() {
 			}
 
 			if resp, err := http.Get(s.StatusUrl); err != nil {
-				s.Channel <- NginxStatus{ErrorMessage: fmt.Sprintf("%s\n", err)}
+				s.StatsChannel <- NginxStatus{ErrorMessage: fmt.Sprintf("%s\n", err)}
 			} else {
-				s.Channel <- parseStandardStatus(readResponse(resp))
+				s.StatsChannel <- parseStandardStatus(readResponse(resp))
 			}
 
 			time.Sleep(s.SamplingInterval)
@@ -111,6 +112,7 @@ func parseStandardStatus(responseBody string) NginxStatus {
 
 	if len(result) > 0 {
 		return NginxStatus{
+			time.Now(),
 			stringutils.ToUint8(result[0][1]),
 			stringutils.ToUint8(result[0][2]),
 			stringutils.ToUint8(result[0][3]),
@@ -123,7 +125,5 @@ func parseStandardStatus(responseBody string) NginxStatus {
 		}
 	}
 
-	return NginxStatus{ErrorMessage: fmt.Sprintf("Unable to parse\n%s", responseBody)}
+	return NginxStatus{Timestamp: time.Now(), ErrorMessage: fmt.Sprintf("Unable to parse\n%s", responseBody)}
 }
-
-

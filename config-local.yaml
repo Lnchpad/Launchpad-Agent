@@ -1,5 +1,6 @@
 # Configuration File for Testing Locally
 apiversion: 1.0
+dashboardtype: simple
 messaging:
   broker: localhost
 server:

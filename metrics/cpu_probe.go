@@ -10,13 +10,13 @@ type CpuProbe struct {
 	SamplingInterval time.Duration
 
 	// The channel with which metrics will be transmitted
-	Channel     chan Metrics
-	probeStatus ProbeStatus
+	MetricsChannel chan Metrics
+	probeStatus    ProbeStatus
 }
 
 func NewCpuProbe(samplingInterval time.Duration) *CpuProbe {
 	ch := make(chan Metrics)
-	return &CpuProbe{SamplingInterval: samplingInterval, Channel: ch}
+	return &CpuProbe{SamplingInterval: samplingInterval, MetricsChannel: ch}
 }
 
 func (c *CpuProbe) Observe() {
@@ -31,7 +31,13 @@ func (c *CpuProbe) Observe() {
 			}
 
 			v, _ := cpu.Percent(c.SamplingInterval, false)
-			c.Channel <- Metrics{Label: "CpuProbe Utilization", Value: v[0]}
+
+			c.MetricsChannel <- Metrics{
+				Timestamp: time.Now(),
+				Type:  TypeCpu,
+				Label: "CpuProbe Utilization",
+				Value: v[0],
+			}
 		}
 	}()
 }
