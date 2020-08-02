@@ -8,14 +8,20 @@ import (
 
 type MemoryProbe struct {
 	SamplingInterval time.Duration
-	MetricsChannel   chan Metrics
-
 	probeStatus ProbeStatus
+	subscribers []Subscriber
 }
 
 func NewMemoryProbe(samplingInterval time.Duration) *MemoryProbe {
-	ch := make(chan Metrics)
-	return &MemoryProbe{SamplingInterval: samplingInterval, MetricsChannel: ch, probeStatus: Running}
+	return &MemoryProbe{SamplingInterval: samplingInterval, probeStatus: Running}
+}
+
+func (m *MemoryProbe) SubscribeMany(subscribers []Subscriber) {
+	m.subscribers = subscribers
+}
+
+func (m *MemoryProbe) Subscribe(subscriber Subscriber) {
+	m.subscribers = append(m.subscribers, subscriber)
 }
 
 func (m *MemoryProbe) Observe() {
@@ -30,12 +36,17 @@ func (m *MemoryProbe) Observe() {
 			}
 
 			v, _ := mem.VirtualMemory()
-			m.MetricsChannel <- Metrics{
-				Timestamp: time.Now(),
-				Type: TypeMemory,
-				Label: "Memory Utilization",
-				Value: v.UsedPercent,
+			for _, sub := range m.subscribers {
+				if err := sub.Update(Metrics{
+					Timestamp: time.Now(),
+					Type: TypeMemory,
+					Label: "Memory Utilization",
+					Value: v.UsedPercent,
+				}); err != nil {
+					log.Printf("Unable to update %v, reason %s\n", sub, err)
+				}
 			}
+
 			time.Sleep(m.SamplingInterval)
 		}
 	}()

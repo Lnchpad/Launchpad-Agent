@@ -15,3 +15,12 @@ type Metrics struct {
 	Label     string
 	Value     float64
 }
+
+type Subscriber interface {
+	Update(metrics Metrics) error
+}
+
+type Publisher interface {
+	SubscribeMany([]Subscriber)
+	Subscribe(Subscriber)
+}

@@ -3,7 +3,7 @@ package nginx
 import (
 	"cjavellana.me/launchpad/agent/errors"
 	"cjavellana.me/launchpad/agent/models"
-	"cjavellana.me/launchpad/agent/os"
+	"cjavellana.me/launchpad/agent/system"
 	"fmt"
 	"io/ioutil"
 	"os/exec"
@@ -30,7 +30,7 @@ type Server struct {
 	Monitor   *Monitor
 }
 
-func (n *Server) Start() os.Process {
+func (n *Server) Start() system.Process {
 	fmt.Println("Starting nginx server")
 
 	err := n.createOrUpdateConfigFile()
@@ -40,18 +40,18 @@ func (n *Server) Start() os.Process {
 	reader, err := cmd.StdoutPipe()
 	errors.CheckFatal(err)
 
-	return os.Process{Stdout: reader, Err: cmd.Start()}
+	return system.Process{Stdout: reader, Err: cmd.Start()}
 }
 
 func (n *Server) Stop() {
 }
 
-func (n *Server) Reload() os.Process {
+func (n *Server) Reload() system.Process {
 	cmd := exec.Command(n.NginxPath, "-s", "reload")
 	reader, err := cmd.StdoutPipe()
 	errors.CheckFatal(err)
 
-	return os.Process{Stdout: reader, Err: cmd.Start()}
+	return system.Process{Stdout: reader, Err: cmd.Start()}
 }
 
 func (n *Server) Status() string {

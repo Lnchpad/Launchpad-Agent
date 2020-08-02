@@ -36,7 +36,7 @@ func NewLineChart(maxSeriesElements int, timeInterval time.Duration) *LineChart 
 	}
 }
 
-func (lc *LineChart) AddElement(m metrics.Metrics) {
+func (lc *LineChart) Update(m metrics.Metrics) error {
 	lc.inputs = append(lc.inputs, m.Value)
 
 	now := time.Now()
@@ -58,5 +58,7 @@ func (lc *LineChart) AddElement(m metrics.Metrics) {
 	); err != nil {
 		panic(err)
 	}
+
+	return nil
 }
 

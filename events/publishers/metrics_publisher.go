@@ -8,7 +8,6 @@ import (
 	"github.com/golang/protobuf/ptypes"
 )
 
-var cpuMetricsTopic = "launchpad.agent.cpu"
 var logsTopic = "launchpad.agent.logs"
 
 type MetricsPublisher struct {
@@ -37,12 +36,12 @@ func (m *MetricsPublisher) PublishServerLogs(logs string) error {
 	return nil
 }
 
-func (m *MetricsPublisher) PublishCpuMetrics(cpu metrics.Metrics) error {
+func publishMetrics(metrics metrics.Metrics, producer *kafka.Producer, topic string) error {
 	cpuMetrics := protobuf.Metrics{
 		Timestamp: ptypes.TimestampNow(),
-		Type: string(cpu.Type),
-		Label: cpu.Label,
-		Value: float32(cpu.Value),
+		Type: string(metrics.Type),
+		Label: metrics.Label,
+		Value: float32(metrics.Value),
 	}
 
 	metricsAsBytes, err := proto.Marshal(&cpuMetrics)
@@ -50,8 +49,8 @@ func (m *MetricsPublisher) PublishCpuMetrics(cpu metrics.Metrics) error {
 		return err
 	}
 
-	err = m.producer.Produce(&kafka.Message{
-		TopicPartition: kafka.TopicPartition{Topic: &cpuMetricsTopic, Partition: kafka.PartitionAny},
+	err = producer.Produce(&kafka.Message{
+		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 		Value:          metricsAsBytes,
 	}, nil)
 	if err != nil {

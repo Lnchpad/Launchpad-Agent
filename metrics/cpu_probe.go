@@ -9,14 +9,20 @@ import (
 type CpuProbe struct {
 	SamplingInterval time.Duration
 
-	// The channel with which metrics will be transmitted
-	MetricsChannel chan Metrics
 	probeStatus    ProbeStatus
+	subscribers []Subscriber
 }
 
 func NewCpuProbe(samplingInterval time.Duration) *CpuProbe {
-	ch := make(chan Metrics)
-	return &CpuProbe{SamplingInterval: samplingInterval, MetricsChannel: ch}
+	return &CpuProbe{SamplingInterval: samplingInterval}
+}
+
+func (c *CpuProbe) SubscribeMany(subscribers []Subscriber) {
+	c.subscribers = subscribers
+}
+
+func (c *CpuProbe) Subscribe(subscriber Subscriber) {
+	c.subscribers = append(c.subscribers, subscriber)
 }
 
 func (c *CpuProbe) Observe() {
@@ -32,11 +38,15 @@ func (c *CpuProbe) Observe() {
 
 			v, _ := cpu.Percent(c.SamplingInterval, false)
 
-			c.MetricsChannel <- Metrics{
-				Timestamp: time.Now(),
-				Type:  TypeCpu,
-				Label: "CpuProbe Utilization",
-				Value: v[0],
+			for _, sub := range c.subscribers {
+				if err := sub.Update(Metrics{
+					Timestamp: time.Now(),
+					Type:  TypeCpu,
+					Label: "CpuProbe Utilization",
+					Value: v[0],
+				}); err != nil {
+					log.Printf("Unable to update %v, reason %s\n", sub, err)
+				}
 			}
 		}
 	}()
