@@ -30,7 +30,7 @@ type Server struct {
 	Monitor   *Monitor
 }
 
-func (n *Server) Start() system.Process {
+func (n *Server) Start() (system.Process, error) {
 	fmt.Println("Starting nginx server")
 
 	err := n.createOrUpdateConfigFile()
@@ -40,7 +40,7 @@ func (n *Server) Start() system.Process {
 	reader, err := cmd.StdoutPipe()
 	errors.CheckFatal(err)
 
-	return system.Process{Stdout: reader, Err: cmd.Start()}
+	return system.Process{Stdout: reader}, cmd.Start()
 }
 
 func (n *Server) Stop() {

@@ -15,7 +15,9 @@ type Process struct {
 	terminateFollow chan bool
 }
 
-func (s *Process) TailStdout(out chan string) {
+func (s *Process) StdOut() chan string {
+	out := make(chan string)
+
 	go func(reader io.Reader) {
 		scanner := bufio.NewScanner(reader)
 
@@ -31,6 +33,8 @@ func (s *Process) TailStdout(out chan string) {
 		}
 
 	}(s.Stdout)
+
+	return out
 }
 
 func (s *Process) StopTail() {
