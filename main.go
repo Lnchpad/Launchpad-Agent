@@ -37,14 +37,16 @@ func parseArgs() *StartUpArgs {
 	}
 }
 
-func initializeProbes(serverCfg *nginx.Server, probes *SystemProbes) {
-	probes.cpu = metrics.NewCpuProbe(1 * time.Second)
-	probes.mem = metrics.NewMemoryProbe(1 * time.Second)
-	probes.serverStat = metrics.NewNginxProbe(
-		serverCfg.Monitor.MonitoringUrl,
-		time.Duration(serverCfg.Monitor.PollingIntervalSecs)*time.Second,
-		time.Duration(serverCfg.Monitor.InitialDelaySecs)*time.Second,
-	)
+func initializeProbes(serverCfg nginx.Server) SystemProbes {
+	probes := SystemProbes{
+		cpu: metrics.NewCpuProbe(1 * time.Second),
+		mem: metrics.NewMemoryProbe(1 * time.Second),
+		serverStat: metrics.NewNginxProbe(
+			serverCfg.Monitor.MonitoringUrl,
+			time.Duration(serverCfg.Monitor.PollingIntervalSecs)*time.Second,
+			time.Duration(serverCfg.Monitor.InitialDelaySecs)*time.Second,
+		),
+	}
 
 	// Start the Probes
 	observers := []metrics.Probe{probes.cpu,
@@ -52,13 +54,14 @@ func initializeProbes(serverCfg *nginx.Server, probes *SystemProbes) {
 		probes.serverStat,
 	}
 	system.Observe(observers)
+	return probes
 }
 
 func main() {
 	args := parseArgs()
 
 	appCfg := GetServerConfigFrom(args.config)
-	server := &appCfg.Server
+	server := appCfg.Server
 
 	serverProcess, err := server.Start()
 	errors.CheckFatal(err)
@@ -67,8 +70,7 @@ func main() {
 	// for Build content
 	logsChannel := serverProcess.StdOut()
 
-	var probes SystemProbes
-	initializeProbes(server, &probes)
+	probes := initializeProbes(server)
 
 	// Get Kafka Producer
 	broker := messaging.NewKafkaBroker(appCfg.Messaging)

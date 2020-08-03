@@ -15,7 +15,7 @@ type Process struct {
 	terminateFollow chan bool
 }
 
-func (s *Process) StdOut() chan string {
+func (p *Process) StdOut() chan string {
 	out := make(chan string)
 
 	go func(reader io.Reader) {
@@ -23,7 +23,7 @@ func (s *Process) StdOut() chan string {
 
 		for {
 			select {
-			case <-s.terminateFollow:
+			case <-p.terminateFollow:
 				return
 			default:
 				if scanner.Scan() {
@@ -32,13 +32,13 @@ func (s *Process) StdOut() chan string {
 			}
 		}
 
-	}(s.Stdout)
+	}(p.Stdout)
 
 	return out
 }
 
-func (s *Process) StopTail() {
-	if s.isTailActive {
-		s.terminateFollow <- true
+func (p *Process) StopTail() {
+	if p.isTailActive {
+		p.terminateFollow <- true
 	}
 }
