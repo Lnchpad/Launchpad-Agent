@@ -29,3 +29,16 @@ func (k *KafkaBroker) NewProducer() *kafka.Producer {
 
 	return p
 }
+
+func (k *KafkaBroker) NewConsumer() *kafka.Consumer {
+	c, err := kafka.NewConsumer(&kafka.ConfigMap{
+		"bootstrap.servers": k.broker,
+	})
+
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
+
+	return c
+}

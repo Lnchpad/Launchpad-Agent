@@ -1,30 +1,31 @@
 package view
 
 import (
+	"cjavellana.me/launchpad/agent/view/widgets"
 	"github.com/mum4k/termdash/container"
 	"github.com/mum4k/termdash/linestyle"
 	"github.com/mum4k/termdash/terminal/termbox"
-	"github.com/mum4k/termdash/widgets/linechart"
 	"github.com/mum4k/termdash/widgets/text"
 )
 
 type SimpleDashboard struct {
-	cpuUsage    *linechart.LineChart
-	memoryUsage *linechart.LineChart
+	cpuUsage    *widgets.LineChart
+	memoryUsage *widgets.LineChart
 	serverLog   *text.Text
 	agentLog    *text.Text
+
 }
 
 func SimpleDashboardBuilder() *SimpleDashboard {
 	return &SimpleDashboard{}
 }
 
-func (d *SimpleDashboard) WithCpuWidget(chart *linechart.LineChart) *SimpleDashboard {
+func (d *SimpleDashboard) WithCpuWidget(chart *widgets.LineChart) *SimpleDashboard {
 	d.cpuUsage = chart
 	return d
 }
 
-func (d *SimpleDashboard) WithMemoryWidget(chart *linechart.LineChart) *SimpleDashboard {
+func (d *SimpleDashboard) WithMemoryWidget(chart *widgets.LineChart) *SimpleDashboard {
 	d.memoryUsage = chart
 	return d
 }
@@ -44,14 +45,14 @@ func (d *SimpleDashboard) Build(terminal *termbox.Terminal) *container.Container
 	cpuWidget = append(cpuWidget,
 		container.Border(linestyle.Light),
 		container.BorderTitle("CPU Usage"),
-		container.PlaceWidget(d.cpuUsage),
+		container.PlaceWidget(d.cpuUsage.LineChart),
 	)
 
 	memoryWidget := make([]container.Option, 0, 3)
 	memoryWidget = append(memoryWidget,
 		container.Border(linestyle.Light),
 		container.BorderTitle("Memory Usage"),
-		container.PlaceWidget(d.memoryUsage),
+		container.PlaceWidget(d.memoryUsage.LineChart),
 	)
 
 	stdoutWidget := make([]container.Option, 0, 3)

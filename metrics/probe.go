@@ -13,14 +13,3 @@ type Probe interface {
 	StopObserver()
 }
 
-func Observe(m []Probe) {
-	for _, monitor := range m {
-		monitor.Observe()
-	}
-}
-
-func StopObserver(m []Probe) {
-	for _, observer := range m {
-		observer.StopObserver()
-	}
-}
