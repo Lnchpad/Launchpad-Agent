@@ -1,0 +1,84 @@
+# Configuration File for Testing Locally
+apiversion: 1.0
+viewtype: none
+serverconfig:
+  executablepath: local
+  configlocation: /tmp/nginx.conf
+  rootdirectory: /usr/share/nginx/html
+  configtemplate: |
+    user  nginx;
+    worker_processes  1;
+
+    error_log  /var/log/nginx/error.log warn;
+    pid        /var/run/nginx.pid;
+
+    events {
+        worker_connections  1024;
+    }
+
+    http {
+        include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+
+        log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                          '$status $body_bytes_sent "$http_referer" '
+                          '"$http_user_agent" "$http_x_forwarded_for"';
+
+        access_log  /var/log/nginx/access.log  main;
+
+        sendfile        on;
+        #tcp_nopush     on;
+
+        keepalive_timeout  65;
+
+        #gzip  on;
+
+        server {
+            listen 127.0.0.1:1337;
+            server_name 127.0.0.1;
+
+            location /nginx_status {
+                stub_status;
+            }
+        }
+
+        server {
+            listen       80;
+            server_name  localhost;
+
+            #charset koi8-r;
+            #access_log  /var/log/nginx/host.access.log  main;
+
+            location / {
+                root   {{.RootDirectory}};
+                index  index.html index.htm;
+            }
+
+            error_page  404              /404.html;
+
+            # redirect server error pages to the static page /50x.html
+            #
+            error_page   500 502 503 504  /50x.html;
+            location = /50x.html {
+                root   {{.RootDirectory}};
+            }
+
+            # deny access to .htaccess files, if Apache's document root
+            # concurs with nginx's one
+            #
+            #location ~ /\.ht {
+            #    deny  all;
+            #}
+        }
+    }
+probeconfig:
+  enabled: true
+  probetypes:
+    - cpu
+    - memory
+brokerconfig:
+  hosts:
+    - localhost:9092
+  consumers:
+    sometopic:
+      topic: helloworld
