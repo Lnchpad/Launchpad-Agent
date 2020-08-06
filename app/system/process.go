@@ -2,7 +2,6 @@ package system
 
 import (
 	"bufio"
-	observer "cjavellana.me/launchpad/agent/app/observers"
 	"errors"
 	"fmt"
 	"io"
@@ -11,7 +10,7 @@ import (
 type Stdout struct {
 	Reader io.Reader
 
-	observers []observer.TextObserver
+	observers []TextObserver
 	done      chan bool
 }
 
@@ -29,7 +28,7 @@ func (out *Stdout) StopObserving() error {
 	return nil
 }
 
-func (out *Stdout) Observe(observer observer.TextObserver) {
+func (out *Stdout) Observe(observer TextObserver) {
 	if out.done == nil {
 		out.done = make(chan bool)
 	}
