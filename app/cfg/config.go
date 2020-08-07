@@ -36,9 +36,9 @@ const (
 )
 
 type ProbeConfig struct {
-	Enabled bool
-
-	ProbeTypes []ProbeType
+	Enabled          bool
+	SamplingInterval uint
+	ProbeTypes       []ProbeType
 }
 
 type AppConfig struct {

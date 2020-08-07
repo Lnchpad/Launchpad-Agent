@@ -15,6 +15,6 @@ type Metric struct {
 	Value float64
 }
 
-type MetricObserver interface {
+type ProbeObserver interface {
 	Update(metric Metric)
 }

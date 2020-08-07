@@ -7,6 +7,7 @@ import (
 	"cjavellana.me/launchpad/agent/app/system"
 	"cjavellana.me/launchpad/agent/app/view"
 	"log"
+	"time"
 )
 
 type Agent struct {
@@ -35,7 +36,7 @@ func (agent *Agent) Terminate() {
 	_ = agent.Nginx.Stop()
 }
 
-func (agent *Agent) initWebServer(){
+func (agent *Agent) initWebServer() {
 	appCfg := agent.AppCfg
 
 	nginx := servers.NewNginx(appCfg.ServerConfig)
@@ -46,7 +47,7 @@ func (agent *Agent) initWebServer(){
 	agent.Nginx = nginx
 }
 
-func (agent *Agent) initMessageBroker(){
+func (agent *Agent) initMessageBroker() {
 	appCfg := agent.AppCfg
 	broker := messaging.NewBroker(appCfg.BrokerConfig)
 	agent.Broker = broker
@@ -63,6 +64,11 @@ func (agent *Agent) initProbes() {
 		enabledProbes := probeCfg.ProbeTypes
 		if len(enabledProbes) < 1 {
 			log.Fatalf("no probes found")
+		}
+
+		for _, p := range probeCfg.ProbeTypes {
+			probe := system.NewProbe(p, time.Duration(probeCfg.SamplingInterval)*time.Second)
+			agent.Probes = append(agent.Probes, probe)
 		}
 	}
 }

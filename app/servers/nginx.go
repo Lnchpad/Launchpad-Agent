@@ -41,9 +41,7 @@ func (n *Nginx) Start() error {
 	if reader, err := cmd.StdoutPipe(); err != nil {
 		return err
 	} else {
-		process.Stdout = system.Stdout{
-			Reader: reader,
-		}
+		process.Stdout = system.NewStdout(reader)
 	}
 
 	if err := cmd.Start(); err != nil {

@@ -12,6 +12,7 @@ type Stdout struct {
 
 	observers []TextObserver
 	done      chan bool
+	status    Status
 }
 
 type Process struct {
@@ -19,11 +20,19 @@ type Process struct {
 	Stdout Stdout
 }
 
+func NewStdout(reader io.Reader) Stdout {
+	return Stdout{
+		Reader: reader,
+		status: Stopped,
+	}
+}
+
 func (out *Stdout) StopObserving() error {
 	if out.done == nil {
 		return errors.New("nothing is being observed. are you sure you called observe()")
 	}
 
+	out.status = Stopped
 	out.done <- true
 	return nil
 }
@@ -35,21 +44,24 @@ func (out *Stdout) Observe(observer TextObserver) {
 
 	out.observers = append(out.observers, observer)
 
-	go func(reader io.Reader) {
-		scanner := bufio.NewScanner(reader)
+	if out.status == Stopped {
+		out.status = Running
+		go func(reader io.Reader) {
+			scanner := bufio.NewScanner(reader)
 
-		for {
-			select {
-			case <-out.done:
-				return
-			default:
-				if scanner.Scan() {
-					for _, o := range out.observers {
-						o.Update(fmt.Sprintf("%s\n", scanner.Text()))
+			for {
+				select {
+				case <-out.done:
+					return
+				default:
+					if scanner.Scan() {
+						for _, o := range out.observers {
+							o.Update(fmt.Sprintf("%s\n", scanner.Text()))
+						}
 					}
 				}
 			}
-		}
 
-	}(out.Reader)
+		}(out.Reader)
+	}
 }

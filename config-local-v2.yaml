@@ -73,6 +73,8 @@ serverconfig:
     }
 probeconfig:
   enabled: true
+  # In seconds
+  samplinginterval: 10
   probetypes:
     - cpu
     - memory
