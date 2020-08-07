@@ -1,6 +1,7 @@
 # Configuration File for Testing Locally
 apiversion: 1.0
 viewtype: dashboard-simple
+maxserieselements: 5
 serverconfig:
   executablepath: local
   configlocation: /tmp/nginx.conf

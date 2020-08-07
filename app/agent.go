@@ -6,6 +6,7 @@ import (
 	"cjavellana.me/launchpad/agent/app/servers"
 	"cjavellana.me/launchpad/agent/app/system"
 	"cjavellana.me/launchpad/agent/app/view"
+	"cjavellana.me/launchpad/agent/app/view/dashboard"
 	"context"
 	"github.com/mum4k/termdash"
 	"github.com/mum4k/termdash/terminal/termbox"
@@ -93,7 +94,12 @@ func (agent *Agent) initView() {
 		}
 		defer t.Close()
 
-		display := NewSimpleDashboardBuilder(agent).Build(t)
+		display := dashboard.NewSimpleDashboardBuilder(dashboard.SimpleDashboardConfig{
+			AppCfg:    agent.AppCfg,
+			Probes:    agent.Probes,
+			ServerLog: &agent.Nginx.Process.Stdout,
+		}).Build(t)
+
 		ctx, _ := context.WithCancel(context.Background())
 		if err := termdash.Run(ctx, t, display); err != nil {
 			panic(err)

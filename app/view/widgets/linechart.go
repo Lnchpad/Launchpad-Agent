@@ -29,7 +29,8 @@ func NewLineChart(maxSeriesElements int, timeInterval time.Duration) *LineChart 
 		return &LineChart{
 			LineChart: lc,
 			timeInterval: timeInterval,
-			maxSeriesElements: maxSeriesElements,
+			// +1 makes the line chart display maxSeriesElements time series
+			maxSeriesElements: maxSeriesElements + 1,
 			xSeriesLabels: make(map[int]string),
 			inputs: make([]float64, 0, maxSeriesElements),
 		}
@@ -40,16 +41,18 @@ func (lc *LineChart) Update(m system.Metric) {
 	lc.inputs = append(lc.inputs, m.Value)
 
 	now := time.Now()
+
 	for i := 0; i <= lc.maxSeriesElements; i++ {
 		t := now.Add(lc.timeInterval * -1)
-		lc.xSeriesLabels[lc.maxSeriesElements-i] = fmt.Sprintf("%02d:%02d:%02d", t.Hour(), t.Minute(), t.Second())
+		lc.xSeriesLabels[lc.maxSeriesElements - i] = fmt.Sprintf("%02d:%02d:%02d", t.Hour(), t.Minute(), t.Second())
 
 		now = t
 	}
 
-	// We only keep the last
+	// We only retain the last `maxSeriesElements`
 	if len(lc.inputs) > lc.maxSeriesElements {
 		lc.inputs = lc.inputs[1:]
+		delete(lc.xSeriesLabels, lc.maxSeriesElements)
 	}
 
 	if err := lc.LineChart.Series("first", lc.inputs,

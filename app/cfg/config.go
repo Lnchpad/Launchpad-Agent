@@ -21,8 +21,8 @@ type ServerConfig struct {
 	Applications   []PortalApp
 }
 
-const (
-	DefaultMaxSeriesElements int = 15
+var (
+	defaultMaxSeriesElements = 15
 )
 
 type ViewType string
@@ -50,8 +50,8 @@ type AppConfig struct {
 	// the number of elements to retain in the charts
 	// only applicable when ViewType is dashboard. When ViewType is none,
 	// this property is ignored
-	SeriesElements int
-	ServerConfig   ServerConfig
+	MaxSeriesElements int
+	ServerConfig      ServerConfig
 
 	ProbeConfig ProbeConfig
 
@@ -83,8 +83,8 @@ func parseConfigYaml(yamlConfig []byte) AppConfig {
 	}
 
 	// set series element defaults (if none is given)
-	if appCfg.SeriesElements == 0 {
-		appCfg.SeriesElements = DefaultMaxSeriesElements
+	if appCfg.MaxSeriesElements == 0 {
+		appCfg.MaxSeriesElements = defaultMaxSeriesElements
 	}
 
 	server := appCfg.ServerConfig

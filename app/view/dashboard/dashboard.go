@@ -1,13 +1,20 @@
-package app
+package dashboard
 
 import (
 	"cjavellana.me/launchpad/agent/app/cfg"
+	"cjavellana.me/launchpad/agent/app/system"
 	"cjavellana.me/launchpad/agent/app/view/widgets"
 	"github.com/mum4k/termdash/container"
 	"github.com/mum4k/termdash/linestyle"
 	"github.com/mum4k/termdash/terminal/termbox"
 	"time"
 )
+
+type SimpleDashboardConfig struct {
+	AppCfg    cfg.AppConfig
+	Probes    []system.Probe
+	ServerLog *system.Stdout
+}
 
 type SimpleDashboard struct {
 	cpuUsage    *widgets.LineChart
@@ -16,12 +23,12 @@ type SimpleDashboard struct {
 	agentLog    *widgets.RollContentDisplay
 }
 
-func NewSimpleDashboardBuilder(agent *Agent) *SimpleDashboard {
+func NewSimpleDashboardBuilder(cfg SimpleDashboardConfig) *SimpleDashboard {
 	// sync the widget time interval to that of the probe sampling intervals
-	timeInterval := samplingInterval(agent)
+	timeInterval := samplingInterval(cfg.AppCfg)
 
-	memWidget := widgets.NewLineChart(agent.AppCfg.SeriesElements, time.Duration(timeInterval)*time.Second)
-	cpuWidget := widgets.NewLineChart(agent.AppCfg.SeriesElements, time.Duration(timeInterval)*time.Second)
+	memWidget := widgets.NewLineChart(cfg.AppCfg.MaxSeriesElements, time.Duration(timeInterval)*time.Second)
+	cpuWidget := widgets.NewLineChart(cfg.AppCfg.MaxSeriesElements, time.Duration(timeInterval)*time.Second)
 	serverLog := widgets.NewRollContentDisplay()
 	agentLog := widgets.NewRollContentDisplay()
 
@@ -32,18 +39,18 @@ func NewSimpleDashboardBuilder(agent *Agent) *SimpleDashboard {
 		agentLog:    agentLog,
 	}
 
-	observeCpuAndMemProbes(&dashboard, agent)
-	observeServerStdout(&dashboard, agent)
+	observeCpuAndMemProbes(&dashboard, cfg.Probes)
+	observeServerStdout(&dashboard, cfg.ServerLog)
 
 	return &dashboard
 }
 
-func observeServerStdout(s *SimpleDashboard, agent *Agent) {
-	agent.Nginx.Process.Stdout.Observe(s.serverLog)
+func observeServerStdout(s *SimpleDashboard, stdout *system.Stdout) {
+	stdout.Observe(s.serverLog)
 }
 
-func observeCpuAndMemProbes(s *SimpleDashboard, agent *Agent) {
-	for _, probe := range agent.Probes {
+func observeCpuAndMemProbes(s *SimpleDashboard, probes []system.Probe) {
+	for _, probe := range probes {
 		switch probe.Type() {
 		case cfg.CpuProbe:
 			probe.Observe(s.cpuUsage)
@@ -53,8 +60,8 @@ func observeCpuAndMemProbes(s *SimpleDashboard, agent *Agent) {
 	}
 }
 
-func samplingInterval(agent *Agent) uint {
-	return agent.AppCfg.ProbeConfig.SamplingInterval
+func samplingInterval(appCfg cfg.AppConfig) uint {
+	return appCfg.ProbeConfig.SamplingInterval
 }
 
 func (d *SimpleDashboard) Build(terminal *termbox.Terminal) *container.Container {
