@@ -79,10 +79,11 @@ func (agent *Agent) initProbes() {
 
 func (agent *Agent) initView() {
 	viewType := agent.AppCfg.ViewType
+	serverLog := agent.Nginx.Process.Stdout
 
 	switch viewType {
 	case cfg.ViewTypeNone:
-		agent.Nginx.Process.Stdout.Observe(&view.SimpleStdoutPrinter{})
+		serverLog.Observe(&view.SimpleStdoutPrinter{})
 	case cfg.ViewTypeDashboardSimple:
 		if len(agent.Probes) < 1 {
 			log.Fatalf("unable to initialize simple display, no probes found")
@@ -97,7 +98,7 @@ func (agent *Agent) initView() {
 		display := dashboard.NewSimpleDashboardBuilder(dashboard.SimpleDashboardConfig{
 			AppCfg:    agent.AppCfg,
 			Probes:    agent.Probes,
-			ServerLog: &agent.Nginx.Process.Stdout,
+			ServerLog: &serverLog,
 		}).Build(t)
 
 		ctx, _ := context.WithCancel(context.Background())
