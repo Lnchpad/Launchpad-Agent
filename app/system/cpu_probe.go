@@ -22,6 +22,7 @@ func (c *CpuProbe) Type() cfg.ProbeType {
 
 func (c *CpuProbe) init(samplingInterval time.Duration) {
 	c.samplingInterval = samplingInterval
+	c.status = Stopped
 }
 
 func (c *CpuProbe) Observe(observer ProbeObserver) {

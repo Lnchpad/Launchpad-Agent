@@ -22,6 +22,7 @@ func (m *MemoryProbe) Type() cfg.ProbeType {
 
 func (m *MemoryProbe) init(samplingInterval time.Duration) {
 	m.samplingInterval = samplingInterval
+	m.status = Stopped
 }
 
 func (m *MemoryProbe) Observe(observer ProbeObserver) {

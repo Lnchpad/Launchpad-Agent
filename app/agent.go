@@ -6,6 +6,9 @@ import (
 	"cjavellana.me/launchpad/agent/app/servers"
 	"cjavellana.me/launchpad/agent/app/system"
 	"cjavellana.me/launchpad/agent/app/view"
+	"context"
+	"github.com/mum4k/termdash"
+	"github.com/mum4k/termdash/terminal/termbox"
 	"log"
 	"time"
 )
@@ -81,7 +84,19 @@ func (agent *Agent) initView() {
 		agent.Nginx.Process.Stdout.Observe(&view.SimpleStdoutPrinter{})
 	case cfg.ViewTypeDashboardSimple:
 		if len(agent.Probes) < 1 {
-			log.Fatalf("unable to initialize simple dashboard, no probes found")
+			log.Fatalf("unable to initialize simple display, no probes found")
+		}
+
+		t, err := termbox.New()
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer t.Close()
+
+		display := NewSimpleDashboardBuilder(agent).Build(t)
+		ctx, _ := context.WithCancel(context.Background())
+		if err := termdash.Run(ctx, t, display); err != nil {
+			panic(err)
 		}
 	}
 }
