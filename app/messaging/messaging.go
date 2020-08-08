@@ -21,7 +21,7 @@ type BrokerConfig struct {
 	//	   # The topic where all agent metrics are published
 	//     topic: "launchpad.metrics"
 	//
-	Producers map[string]interface{} `yaml:"producers,omitempty"`
+	Producers map[string]map[string]interface{} `yaml:"producers,omitempty"`
 
 	// A hierarchical-structured configuration in the form of:
 	// consumers:
@@ -31,7 +31,7 @@ type BrokerConfig struct {
 	//   # This refers to consumer id `topictwo`
 	//   topictwo:
 	//     topic: "launchpad.app.somethingelse"
-	Consumers map[string]interface{} `yaml:"consumers,omitempty"`
+	Consumers map[string]map[string]interface{} `yaml:"consumers,omitempty"`
 }
 
 type MessageConsumer interface {

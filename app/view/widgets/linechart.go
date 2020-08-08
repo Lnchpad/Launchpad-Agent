@@ -1,7 +1,7 @@
 package widgets
 
 import (
-	"cjavellana.me/launchpad/agent/app/system"
+	"cjavellana.me/launchpad/agent/app/stats"
 	"fmt"
 	"github.com/mum4k/termdash/cell"
 	"github.com/mum4k/termdash/widgets/linechart"
@@ -37,7 +37,7 @@ func NewLineChart(maxSeriesElements int, timeInterval time.Duration) *LineChart 
 	}
 }
 
-func (lc *LineChart) Update(m system.Metric) {
+func (lc *LineChart) Update(m stats.Stats) {
 	lc.inputs = append(lc.inputs, m.Value)
 
 	now := time.Now()

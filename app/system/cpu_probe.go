@@ -2,6 +2,7 @@ package system
 
 import (
 	"cjavellana.me/launchpad/agent/app/cfg"
+	"cjavellana.me/launchpad/agent/app/stats"
 	"github.com/shirou/gopsutil/cpu"
 	"log"
 	"time"
@@ -53,7 +54,7 @@ func (c *CpuProbe) poll() {
 
 				// Update the observers asynchronously
 				go func() {
-					observer.Update(Metric{
+					observer.Update(stats.Stats{
 						Timestamp: time.Now(),
 						Label:     string(c.Type()),
 						Value:     v[0],

@@ -4,6 +4,7 @@ import (
 	"cjavellana.me/launchpad/agent/app/cfg"
 	"cjavellana.me/launchpad/agent/app/messaging"
 	"cjavellana.me/launchpad/agent/app/servers"
+	"cjavellana.me/launchpad/agent/app/stats"
 	"cjavellana.me/launchpad/agent/app/system"
 	"cjavellana.me/launchpad/agent/app/view"
 	"cjavellana.me/launchpad/agent/app/view/dashboard"
@@ -60,6 +61,11 @@ func (agent *Agent) initMessageBroker() {
 // registers message producers to system probes for the purpose of
 // sending them to central diagnostics collection system
 func (agent *Agent) initDiagnosticsCollector() {
+	statsCollector := stats.NewBasicStatsCollector(
+		agent.Broker.NewProducer("stats"))
+	for _, probe := range agent.Probes {
+		probe.Observe(&statsCollector)
+	}
 }
 
 func (agent *Agent) initProbes() {

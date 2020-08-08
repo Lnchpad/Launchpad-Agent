@@ -52,8 +52,7 @@ type AppConfig struct {
 	// this property is ignored
 	MaxSeriesElements int
 	ServerConfig      ServerConfig
-
-	ProbeConfig ProbeConfig
+	ProbeConfig       ProbeConfig
 
 	// messaging configurations
 	BrokerConfig messaging.BrokerConfig `yaml:"brokerconfig,omitempty"`

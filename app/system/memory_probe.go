@@ -2,6 +2,7 @@ package system
 
 import (
 	"cjavellana.me/launchpad/agent/app/cfg"
+	"cjavellana.me/launchpad/agent/app/stats"
 	"github.com/shirou/gopsutil/mem"
 	"log"
 	"time"
@@ -52,7 +53,7 @@ func (m *MemoryProbe) poll() {
 
 				// Update the observers asynchronously
 				go func() {
-					observer.Update(Metric{
+					observer.Update(stats.Stats{
 						Timestamp: time.Now(),
 						Label:     cfg.MemProbe,
 						Value:     v.UsedPercent,

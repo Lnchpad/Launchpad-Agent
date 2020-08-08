@@ -80,8 +80,14 @@ probeconfig:
     - cpu
     - memory
 brokerconfig:
+  brokertype: kafka
   hosts:
     - localhost:9092
+  producers:
+    stats:
+      topic: launchpad.stats
+    logs:
+      topic: launchpad.logs
   consumers:
-    sometopic:
-      topic: helloworld
+    app:
+      topic: launchpad.app.deployment

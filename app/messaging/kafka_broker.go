@@ -1,6 +1,7 @@
 package messaging
 
 import (
+	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"log"
 	"strings"
@@ -17,16 +18,20 @@ func (k *KafkaBroker) NewConsumer(consumerId string) MessageConsumer {
 }
 
 func (k *KafkaBroker) NewProducer(producerId string) MessageProducer {
-	kafkaProducer, err := kafka.NewProducer(&kafka.ConfigMap{
+	if kafkaProducer, err := kafka.NewProducer(&kafka.ConfigMap{
 		"bootstrap.servers": strings.Join(k.brokers[:], ","),
-	})
-	if err != nil {
+	}); err != nil {
 		log.Fatal(err)
+	} else {
+		if topic := k.config.Producers[producerId]; topic != nil {
+			return &Producer{
+				producer: kafkaProducer,
+				topic: fmt.Sprintf("%v", topic["topic"]),
+			}
+		}
 	}
 
-	return &Producer{
-		producer: kafkaProducer,
-	}
+	return nil
 }
 
 func newKafkaBroker(config BrokerConfig) Broker {

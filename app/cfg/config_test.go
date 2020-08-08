@@ -36,6 +36,7 @@ brokerconfig:
 			},
 			want: AppConfig{
 				ViewType:     "none",
+				MaxSeriesElements: 15,
 				ServerConfig: ServerConfig{},
 				ProbeConfig: ProbeConfig{
 					Enabled:    true,
@@ -43,10 +44,10 @@ brokerconfig:
 				},
 				BrokerConfig: messaging.BrokerConfig{
 					Hosts: []string{"localhost:9092"},
-					Consumers: map[string]interface{}{
+					Consumers: map[string]map[string]interface{}{
 						// The yaml library unmarshalls the
 						// inner map as map[interface{}] interface
-						"sometopic": map[interface{}]interface{}{
+						"sometopic": {
 							"topic": "helloworld",
 						},
 					},
