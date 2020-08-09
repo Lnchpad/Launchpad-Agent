@@ -10,8 +10,8 @@ func TestNewKafkaBroker(t *testing.T) {
 		config BrokerConfig
 	}
 
-	producerConfig := map[string]interface{}{
-		"metricsproducer": map[string]interface{}{
+	producerConfig := map[string]map[string]interface{}{
+		"metricsproducer": {
 			"topic": "launchpad.metrics",
 		},
 	}
