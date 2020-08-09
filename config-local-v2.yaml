@@ -87,7 +87,7 @@ brokerconfig:
     stats:
       topic: launchpad.stats
     logs:
-      topic: launchpad.logs
+      topic: launchpad.web.logs
   consumers:
     app:
       topic: launchpad.app.deployment

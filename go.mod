@@ -8,6 +8,7 @@ require (
 	github.com/gizak/termui v3.1.0+incompatible // indirect
 	github.com/go-yaml/yaml v2.1.0+incompatible
 	github.com/golang/protobuf v1.4.2
+	github.com/matryer/runner v0.0.0-20190427160343-b472a46105b1
 	github.com/mum4k/termdash v0.12.1
 	github.com/shirou/gopsutil v2.20.6+incompatible
 	github.com/streadway/amqp v1.0.0 // indirect

@@ -2,17 +2,20 @@ package system
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
+	"github.com/matryer/runner"
 	"io"
+	"time"
 )
 
 type Stdout struct {
-	Reader io.Reader
+	Reader io.ReadCloser
 
 	observers []TextObserver
-	done      chan bool
+	done      chan struct{}
 	status    Status
+
+	pollTask *runner.Task
 }
 
 type Process struct {
@@ -20,48 +23,49 @@ type Process struct {
 	Stdout Stdout
 }
 
-func NewStdout(reader io.Reader) Stdout {
+func NewStdout(reader io.ReadCloser) Stdout {
 	return Stdout{
 		Reader: reader,
 		status: Stopped,
+		done:   make(chan struct{}),
 	}
 }
 
-func (out *Stdout) StopObserving() error {
-	if out.done == nil {
-		return errors.New("nothing is being observed. are you sure you called observe()")
-	}
+func (out *Stdout) StopObserving() {
+	close(out.done)
+	out.pollTask.Stop()
 
-	out.status = Stopped
-	out.done <- true
-	return nil
+	select {
+	case <-out.pollTask.StopChan():
+		// task successfully stopped
+	case <-time.After(2 * time.Second):
+		// task didn't stop in time
+	}
 }
 
-func (out *Stdout) Observe(observer TextObserver) {
-	if out.done == nil {
-		out.done = make(chan bool)
-	}
-
-	out.observers = append(out.observers, observer)
-
-	if out.status == Stopped {
-		out.status = Running
-		go func(reader io.Reader) {
-			scanner := bufio.NewScanner(reader)
-
-			for {
-				select {
-				case <-out.done:
-					return
-				default:
-					if scanner.Scan() {
-						for _, o := range out.observers {
-							o.Update(fmt.Sprintf("%s\n", scanner.Text()))
-						}
+func (out *Stdout) StartObserving() {
+	out.done = make(chan struct{})
+	out.pollTask = runner.Go(func(shouldStop runner.S) error {
+		scanner := bufio.NewScanner(out.Reader)
+		for {
+			select {
+			case <-out.done:
+				break
+			default:
+				if scanner.Scan() {
+					for _, o := range out.observers {
+						o.Update(fmt.Sprintf("%s\n", scanner.Text()))
 					}
 				}
 			}
+		}
+	})
+}
 
-		}(out.Reader)
+func (out *Stdout) Observe(observer TextObserver) {
+	out.observers = append(out.observers, observer)
+
+	if out.pollTask != nil && out.pollTask.Running() {
+		out.StopObserving()
 	}
 }

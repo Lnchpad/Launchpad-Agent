@@ -1,7 +1,8 @@
-package stats
+package collectors
 
 import (
 	"cjavellana.me/launchpad/agent/app/messaging"
+	"cjavellana.me/launchpad/agent/app/stats"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"log"
@@ -9,23 +10,24 @@ import (
 )
 
 // collects cpu, memory, network utilization type of stats
-type BasicStatsCollector struct {
+type StatsCollector struct {
 	messageSender messaging.MessageProducer
 }
 
-func NewBasicStatsCollector(messageSender messaging.MessageProducer) BasicStatsCollector {
-	return BasicStatsCollector{messageSender: messageSender}
+func NewStatsCollector(messageSender messaging.MessageProducer) StatsCollector {
+	return StatsCollector{messageSender: messageSender}
 }
 
-func (c *BasicStatsCollector) Update(stats Stats) {
+func (c *StatsCollector) Update(s stats.Stats) {
 	hostname, _ := os.Hostname()
 
-	bStats, _ := proto.Marshal(&Metrics{
+	bStats, _ := proto.Marshal(&stats.Metrics{
 		Timestamp: ptypes.TimestampNow(),
-		Type:      "web",
+		Service:   "web",
+		Type:      s.Label,
 		Hostname:  hostname,
-		Label:     stats.Label,
-		Value:     float32(stats.Value),
+		Label:     s.Label,
+		Value:     float32(s.Value),
 	})
 
 	err := c.messageSender.Send(bStats)

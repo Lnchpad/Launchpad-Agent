@@ -2,9 +2,9 @@ package app
 
 import (
 	"cjavellana.me/launchpad/agent/app/cfg"
+	"cjavellana.me/launchpad/agent/app/collectors"
 	"cjavellana.me/launchpad/agent/app/messaging"
 	"cjavellana.me/launchpad/agent/app/servers"
-	"cjavellana.me/launchpad/agent/app/stats"
 	"cjavellana.me/launchpad/agent/app/system"
 	"cjavellana.me/launchpad/agent/app/view"
 	"cjavellana.me/launchpad/agent/app/view/dashboard"
@@ -32,7 +32,7 @@ func (agent *Agent) Start() {
 	agent.initWebServer()
 	agent.initMessageBroker()
 	agent.initProbes()
-	agent.initDiagnosticsCollector()
+	agent.initLogsAndStatsCollector()
 	agent.initView()
 }
 
@@ -60,12 +60,19 @@ func (agent *Agent) initMessageBroker() {
 
 // registers message producers to system probes for the purpose of
 // sending them to central diagnostics collection system
-func (agent *Agent) initDiagnosticsCollector() {
-	statsCollector := stats.NewBasicStatsCollector(
+func (agent *Agent) initLogsAndStatsCollector() {
+	// cpu & memory utilization
+	statsCollector := collectors.NewStatsCollector(
 		agent.Broker.NewProducer("stats"))
 	for _, probe := range agent.Probes {
 		probe.Observe(&statsCollector)
 	}
+
+	// nginx logs
+	logCollector := collectors.NewLogCollector(agent.Broker.NewProducer("logs"))
+	agent.Nginx.Process.Stdout.Observe(&logCollector)
+
+	// nginx stats
 }
 
 func (agent *Agent) initProbes() {
@@ -85,11 +92,16 @@ func (agent *Agent) initProbes() {
 
 func (agent *Agent) initView() {
 	viewType := agent.AppCfg.ViewType
-	serverLog := agent.Nginx.Process.Stdout
+
+	// Point server log to the address of Stdout otherwise,
+	// serverLog will hold a copy of the `Stdout` structure
+	// resulting to the dashboard not being able to stream server logs
+	serverLog := &agent.Nginx.Process.Stdout
 
 	switch viewType {
 	case cfg.ViewTypeNone:
 		serverLog.Observe(&view.SimpleStdoutPrinter{})
+		agent.StartReceivingLogs()
 	case cfg.ViewTypeDashboardSimple:
 		if len(agent.Probes) < 1 {
 			log.Fatalf("unable to initialize simple display, no probes found")
@@ -104,12 +116,18 @@ func (agent *Agent) initView() {
 		display := dashboard.NewSimpleDashboardBuilder(dashboard.SimpleDashboardConfig{
 			AppCfg:    agent.AppCfg,
 			Probes:    agent.Probes,
-			ServerLog: &serverLog,
+			ServerLog: serverLog,
 		}).Build(t)
+
+		agent.StartReceivingLogs()
 
 		ctx, _ := context.WithCancel(context.Background())
 		if err := termdash.Run(ctx, t, display); err != nil {
 			panic(err)
 		}
 	}
+}
+
+func (agent *Agent) StartReceivingLogs() {
+	agent.Nginx.Process.Stdout.StartObserving()
 }
