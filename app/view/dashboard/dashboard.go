@@ -14,6 +14,7 @@ type SimpleDashboardConfig struct {
 	AppCfg    cfg.AppConfig
 	Probes    []system.Probe
 	ServerLog *system.Stdout
+	WebStats  *system.WebStatsProbe
 }
 
 type SimpleDashboard struct {
@@ -41,8 +42,13 @@ func NewSimpleDashboardBuilder(cfg SimpleDashboardConfig) *SimpleDashboard {
 
 	observeCpuAndMemProbes(&dashboard, cfg.Probes)
 	observeServerStdout(&dashboard, cfg.ServerLog)
+	observeWebStats(&dashboard, cfg.WebStats)
 
 	return &dashboard
+}
+
+func observeWebStats(s *SimpleDashboard, ws *system.WebStatsProbe) {
+	ws.Observe(s.agentLog)
 }
 
 func observeServerStdout(s *SimpleDashboard, stdout *system.Stdout) {

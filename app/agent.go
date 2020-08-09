@@ -19,9 +19,10 @@ type Agent struct {
 	AppCfg cfg.AppConfig
 
 	// these are set on agent start
-	Broker messaging.Broker
-	Nginx  servers.Nginx
-	Probes []system.Probe
+	Broker   messaging.Broker
+	Nginx    servers.Nginx
+	Probes   []system.Probe
+	WebStats system.WebStatsProbe
 }
 
 func NewAgent() Agent {
@@ -73,6 +74,8 @@ func (agent *Agent) initLogsAndStatsCollector() {
 	agent.Nginx.Process.Stdout.Observe(&logCollector)
 
 	// nginx stats
+	webStatsCollector := collectors.NewWebStatsCollector(agent.Broker.NewProducer("webstats"))
+	agent.WebStats.Observe(&webStatsCollector)
 }
 
 func (agent *Agent) initProbes() {
@@ -88,6 +91,12 @@ func (agent *Agent) initProbes() {
 			agent.Probes = append(agent.Probes, probe)
 		}
 	}
+
+	agent.WebStats = system.NewWebStatsProbe(
+		probeCfg.WebStatsConfig.StatsUrl,
+		time.Duration(probeCfg.SamplingInterval)*time.Second,
+		time.Duration(probeCfg.WebStatsConfig.InitialDelay)*time.Second,
+	)
 }
 
 func (agent *Agent) initView() {
@@ -97,6 +106,7 @@ func (agent *Agent) initView() {
 	// serverLog will hold a copy of the `Stdout` structure
 	// resulting to the dashboard not being able to stream server logs
 	serverLog := &agent.Nginx.Process.Stdout
+	webStats := &agent.WebStats
 
 	switch viewType {
 	case cfg.ViewTypeNone:
@@ -117,6 +127,7 @@ func (agent *Agent) initView() {
 			AppCfg:    agent.AppCfg,
 			Probes:    agent.Probes,
 			ServerLog: serverLog,
+			WebStats:  webStats,
 		}).Build(t)
 
 		agent.StartReceivingLogs()

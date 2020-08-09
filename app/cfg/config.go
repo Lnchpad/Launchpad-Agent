@@ -39,9 +39,16 @@ const (
 	MemProbe           = "memory"
 )
 
+type WebStatsConfig struct {
+	StatsUrl         string
+	SamplingInterval uint
+	InitialDelay     uint
+}
+
 type ProbeConfig struct {
 	Enabled          bool
 	SamplingInterval uint
+	WebStatsConfig   WebStatsConfig
 	ProbeTypes       []ProbeType
 }
 

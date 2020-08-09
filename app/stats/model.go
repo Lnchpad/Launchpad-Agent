@@ -10,13 +10,13 @@ import "time"
 // Reading: 0 Writing: 1 Waiting: 0
 type WebServerStats struct {
 	Timestamp         time.Time
-	ActiveConnections uint8
-	Accepted          uint8
-	Handled           uint8
-	Requests          uint8
-	Reading           uint8
-	Writing           uint8
-	Waiting           uint8
+	ActiveConnections uint32
+	Accepted          uint32
+	Handled           uint32
+	Requests          uint32
+	Reading           uint32
+	Writing           uint32
+	Waiting           uint32
 	RawData           string
 	ErrorMessage      string
 }

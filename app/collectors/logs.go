@@ -2,7 +2,7 @@ package collectors
 
 import (
 	"cjavellana.me/launchpad/agent/app/messaging"
-	"cjavellana.me/launchpad/agent/app/stats"
+	"cjavellana.me/launchpad/agent/app/stats/pb"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"log"
@@ -24,7 +24,7 @@ func (c *LogCollector) Update(text string) {
 		return
 	}
 
-	pbLog, err := proto.Marshal(&stats.SimpleLog{
+	pbLog, err := proto.Marshal(&pb.SimpleLog{
 		Timestamp: ptypes.TimestampNow(),
 		Hostname:  hostname,
 		Service:   "web",

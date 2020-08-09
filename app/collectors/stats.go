@@ -3,6 +3,7 @@ package collectors
 import (
 	"cjavellana.me/launchpad/agent/app/messaging"
 	"cjavellana.me/launchpad/agent/app/stats"
+	"cjavellana.me/launchpad/agent/app/stats/pb"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"log"
@@ -21,7 +22,7 @@ func NewStatsCollector(messageSender messaging.MessageProducer) StatsCollector {
 func (c *StatsCollector) Update(s stats.Stats) {
 	hostname, _ := os.Hostname()
 
-	bStats, _ := proto.Marshal(&stats.Metrics{
+	bStats, _ := proto.Marshal(&pb.Metrics{
 		Timestamp: ptypes.TimestampNow(),
 		Service:   "web",
 		Type:      s.Label,

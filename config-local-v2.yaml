@@ -76,6 +76,10 @@ probeconfig:
   enabled: true
   # In seconds
   samplinginterval: 1
+  webstatsconfig:
+    statsurl: http://127.0.0.1:1337/nginx_status
+    # Unit in seconds
+    initialdelay: 10
   probetypes:
     - cpu
     - memory
@@ -84,8 +88,13 @@ brokerconfig:
   hosts:
     - localhost:9092
   producers:
+    # stats refer to cpu, memory, network utilization
+    # and is common for all services in this platform
     stats:
       topic: launchpad.stats
+    # webstats are metrics obtained specifically from a webserver. e.g. nginx
+    webstats:
+      topic: launchpad.web.stats
     logs:
       topic: launchpad.web.logs
   consumers:
