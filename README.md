@@ -29,7 +29,17 @@ In order to minimize the footprint of this agent on the webserver a programming 
     $ protoc -I=./launchpad-schema -I=./launchpad-schema/include --go_out=./launchpad-agent launchpad-schema/metrics.proto
     ```
 
-## Usage
+## Starting Locally
+
+1. Run Kafka
+    ```bash
+   $ docker-compose up -d broker 
+   ```
+
+2. Run Nexus
+    ```bash
+    $ docker-compose up -d nexus
+    ```
 
 ## Troubleshooting
 
