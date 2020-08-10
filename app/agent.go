@@ -2,10 +2,10 @@ package app
 
 import (
 	"cjavellana.me/launchpad/agent/app/cfg"
-	"cjavellana.me/launchpad/agent/app/collectors"
 	"cjavellana.me/launchpad/agent/app/messaging"
 	"cjavellana.me/launchpad/agent/app/messaging/api"
 	"cjavellana.me/launchpad/agent/app/servers"
+	"cjavellana.me/launchpad/agent/app/stats/collectors"
 	"cjavellana.me/launchpad/agent/app/system"
 	"cjavellana.me/launchpad/agent/app/view"
 	"cjavellana.me/launchpad/agent/app/view/dashboard"

@@ -19,6 +19,16 @@ To inform connected clients that a new version of a `portal app` has been made a
 
 In order to minimize the footprint of this agent on the webserver a programming language that compiles to native have been choosen.
 
+## Package Description
+This section describes the top-level packages and their purpose.
+
+|S/No|Package Name|Description                                        |Remarks|
+|----|:-----------|---------------------------------------------------|-------|
+|1   |admin       |Handles bi-directional communication with the admin server||
+|2   |cfg         |Handles application configuration such as parsing of the startup configuration file and populating relevant data structures||
+|3   |messaging   |Handles interaction with various broker providers. e.g. Kafka, RabbitMQ, ZeroMQ, ActiveMQ, etc|Currently, Only Kafka is supported|
+|4   |servers     |Handles interaction with various WebServer implementations. e.g. Nginx, Apache Httpd, etc|Currently, Only Nginx is supported|
+
 ## Getting Started
 
 1. [See Compiling Protocol Buffers](https://developers.google.com/protocol-buffers/docs/gotutorial#compiling-your-protocol-buffers)
