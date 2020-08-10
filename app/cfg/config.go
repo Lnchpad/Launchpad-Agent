@@ -2,7 +2,7 @@ package cfg
 
 import (
 	"bytes"
-	"cjavellana.me/launchpad/agent/app/messaging"
+	"cjavellana.me/launchpad/agent/app/messaging/api"
 	"flag"
 	"github.com/go-yaml/yaml"
 	"html/template"
@@ -62,7 +62,7 @@ type AppConfig struct {
 	ProbeConfig       ProbeConfig
 
 	// messaging configurations
-	BrokerConfig messaging.BrokerConfig `yaml:"brokerconfig,omitempty"`
+	BrokerConfig api.BrokerConfig `yaml:"brokerconfig,omitempty"`
 }
 
 func Get() AppConfig {

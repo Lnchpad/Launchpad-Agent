@@ -4,6 +4,7 @@ import (
 	"cjavellana.me/launchpad/agent/app/cfg"
 	"cjavellana.me/launchpad/agent/app/collectors"
 	"cjavellana.me/launchpad/agent/app/messaging"
+	"cjavellana.me/launchpad/agent/app/messaging/api"
 	"cjavellana.me/launchpad/agent/app/servers"
 	"cjavellana.me/launchpad/agent/app/system"
 	"cjavellana.me/launchpad/agent/app/view"
@@ -19,7 +20,7 @@ type Agent struct {
 	AppCfg cfg.AppConfig
 
 	// these are set on agent start
-	Broker   messaging.Broker
+	Broker   api.Broker
 	Nginx    servers.Nginx
 	Probes   []system.Probe
 	WebStats system.WebStatsProbe

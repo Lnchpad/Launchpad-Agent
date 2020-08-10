@@ -1,23 +1,24 @@
-package messaging
+package kafka
 
 import (
+	"cjavellana.me/launchpad/agent/app/messaging/api"
 	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"log"
 	"strings"
 )
 
-type KafkaBroker struct {
+// kafka specific broker.
+type Broker struct {
 	brokers []string
-
-	config BrokerConfig
+	config api.BrokerConfig
 }
 
-func (k *KafkaBroker) NewConsumer(consumerId string) MessageConsumer {
+func (k *Broker) NewConsumer(consumerId string) api.MessageConsumer {
 	panic("implement me")
 }
 
-func (k *KafkaBroker) NewProducer(producerId string) MessageProducer {
+func (k *Broker) NewProducer(producerId string) api.MessageProducer {
 	if kafkaProducer, err := kafka.NewProducer(&kafka.ConfigMap{
 		"bootstrap.servers": strings.Join(k.brokers[:], ","),
 	}); err != nil {
@@ -34,13 +35,13 @@ func (k *KafkaBroker) NewProducer(producerId string) MessageProducer {
 	return nil
 }
 
-func newKafkaBroker(config BrokerConfig) Broker {
+func NewKafkaBroker(config api.BrokerConfig) api.Broker {
 	servers := config.Hosts
 	if servers == nil {
 		log.Fatal("Unable to find \"boostrap.servers\" parameter")
 	}
 
-	return &KafkaBroker{
+	return &Broker{
 		brokers: servers,
 		config: config,
 	}

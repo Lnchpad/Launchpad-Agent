@@ -1,7 +1,7 @@
 package cfg
 
 import (
-	"cjavellana.me/launchpad/agent/app/messaging"
+	"cjavellana.me/launchpad/agent/app/messaging/api"
 	"reflect"
 	"testing"
 )
@@ -42,7 +42,7 @@ brokerconfig:
 					Enabled:    true,
 					ProbeTypes: []ProbeType{CpuProbe, MemProbe},
 				},
-				BrokerConfig: messaging.BrokerConfig{
+				BrokerConfig: api.BrokerConfig{
 					Hosts: []string{"localhost:9092"},
 					Consumers: map[string]map[string]interface{}{
 						// The yaml library unmarshalls the

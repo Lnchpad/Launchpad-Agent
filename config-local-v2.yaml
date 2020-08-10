@@ -98,5 +98,9 @@ brokerconfig:
     logs:
       topic: launchpad.web.logs
   consumers:
-    app:
+    gblevent:
       topic: launchpad.app.deployment
+      # Consumer Group
+      group: web.agents
+      # Ignore previous messages. We only care about the latest
+      offsetreset: latest

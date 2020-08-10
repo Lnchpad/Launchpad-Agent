@@ -1,13 +1,14 @@
-package messaging
+package kafka
 
 import (
+	"cjavellana.me/launchpad/agent/app/messaging/api"
 	"reflect"
 	"testing"
 )
 
 func TestNewKafkaBroker(t *testing.T) {
 	type args struct {
-		config BrokerConfig
+		config api.BrokerConfig
 	}
 
 	producerConfig := map[string]map[string]interface{}{
@@ -16,8 +17,8 @@ func TestNewKafkaBroker(t *testing.T) {
 		},
 	}
 
-	brokerCfg := BrokerConfig{
-		BrokerType: Kafka,
+	brokerCfg := api.BrokerConfig{
+		BrokerType: api.Kafka,
 		Hosts:      []string{"localhost"},
 		Producers:  producerConfig,
 	}
@@ -25,14 +26,14 @@ func TestNewKafkaBroker(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want Broker
+		want api.Broker
 	}{
 		{
 			name: "itShouldReturnNewKafkaBroker",
 			args: args{
 				config: brokerCfg,
 			},
-			want: &KafkaBroker{
+			want: &Broker{
 				brokers: []string{"localhost"},
 				config: brokerCfg,
 			},
@@ -40,7 +41,7 @@ func TestNewKafkaBroker(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := newKafkaBroker(tt.args.config); !reflect.DeepEqual(got, tt.want) {
+			if got := NewKafkaBroker(tt.args.config); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("newKafkaBroker() = %v, want %v", got, tt.want)
 			}
 		})

@@ -1,7 +1,7 @@
 package collectors
 
 import (
-	"cjavellana.me/launchpad/agent/app/messaging"
+	"cjavellana.me/launchpad/agent/app/messaging/api"
 	"cjavellana.me/launchpad/agent/app/stats"
 	"cjavellana.me/launchpad/agent/app/stats/pb"
 	"github.com/golang/protobuf/proto"
@@ -12,10 +12,10 @@ import (
 
 // collects cpu, memory, network utilization type of stats
 type StatsCollector struct {
-	messageSender messaging.MessageProducer
+	messageSender api.MessageProducer
 }
 
-func NewStatsCollector(messageSender messaging.MessageProducer) StatsCollector {
+func NewStatsCollector(messageSender api.MessageProducer) StatsCollector {
 	return StatsCollector{messageSender: messageSender}
 }
 

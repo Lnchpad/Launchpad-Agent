@@ -1,7 +1,7 @@
 package collectors
 
 import (
-	"cjavellana.me/launchpad/agent/app/messaging"
+	"cjavellana.me/launchpad/agent/app/messaging/api"
 	"cjavellana.me/launchpad/agent/app/stats/pb"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
@@ -10,10 +10,10 @@ import (
 )
 
 type LogCollector struct {
-	messageSender messaging.MessageProducer
+	messageSender api.MessageProducer
 }
 
-func NewLogCollector(messageSender messaging.MessageProducer) LogCollector {
+func NewLogCollector(messageSender api.MessageProducer) LogCollector {
 	return LogCollector{messageSender: messageSender}
 }
 
