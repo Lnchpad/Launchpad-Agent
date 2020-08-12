@@ -34,8 +34,10 @@ type BrokerConfig struct {
 	Consumers map[string]map[string]interface{} `yaml:"consumers,omitempty"`
 }
 
+type Callback func(message []byte)
+
 type MessageConsumer interface {
-	onMessage(message []byte) error
+	Subscribe(cb Callback) error
 }
 
 type MessageProducer interface {
@@ -47,4 +49,3 @@ type Broker interface {
 
 	NewProducer(producerId string) MessageProducer
 }
-

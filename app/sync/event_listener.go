@@ -14,5 +14,9 @@ func NewPortalEventListener(msgConsumer *api.MessageConsumer) PortalEventListene
 	}
 }
 
+func (p *PortalEventListener) Start() {
+
+}
+
 func (p *PortalEventListener) onMessage() {
 }
