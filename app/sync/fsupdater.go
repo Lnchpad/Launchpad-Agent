@@ -1,5 +1,7 @@
 package sync
 
+import "fmt"
+
 // The file system updater. This component is responsible for updating the
 // root directory. This component ensures that there is only a single thread
 // that updates the directory.
@@ -41,6 +43,6 @@ func (fs *FsUpdater) EnqueueJob(job Job) {
 
 func (fs *FsUpdater) start() {
 	for job := range fs.jobChannel {
-		panic(job)
+		fmt.Println(job.AppName)
 	}
 }

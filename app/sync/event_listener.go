@@ -2,7 +2,6 @@ package sync
 
 import (
 	"cjavellana.me/launchpad/agent/app/messaging/api"
-	"fmt"
 	"github.com/golang/protobuf/proto"
 	"log"
 )
@@ -20,14 +19,16 @@ func NewPortalEventListener(consumer api.MessageConsumer, updater FsUpdater) *Po
 }
 
 func (p *PortalEventListener) StartListening() {
-	_ = p.consumer.Subscribe(onMessage)
+	_ = p.consumer.Subscribe(p.onMessage)
 }
 
-func onMessage(cb []byte) {
+func (p *PortalEventListener) onMessage(cb []byte) {
 	app := &PortalAppDeployment{}
 	if err := proto.Unmarshal(cb, app); err != nil {
 		log.Printf("Unable to unmarshall %v", err)
 	}
 
-	fmt.Println(app)
+	p.fsUpdater.EnqueueJob(Job{
+		AppName: app.AppName,
+	})
 }
