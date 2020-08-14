@@ -2,6 +2,9 @@
 apiversion: 1.0
 viewtype: dashboard-simple
 maxserieselements: 5
+fsupdaterconfig:
+  rootdirectory: /usr/share/nginx/html
+  nexusurl: http://localhost:8081
 serverconfig:
   executablepath: local
   configlocation: /tmp/nginx.conf
@@ -75,7 +78,7 @@ serverconfig:
 probeconfig:
   enabled: true
   # In seconds
-  samplinginterval: 1
+  samplinginterval: 5
   webstatsconfig:
     statsurl: http://127.0.0.1:1337/nginx_status
     # Unit in seconds

@@ -1,10 +1,13 @@
 package kafka
 
 import (
-	"cjavellana.me/launchpad/agent/app/messaging/api"
+	msg "cjavellana.me/launchpad/agent/app/messaging/api"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"log"
+	"time"
 )
+
+//
 
 type Consumer struct {
 	kafkaConsumer *kafka.Consumer
@@ -16,7 +19,7 @@ type Consumer struct {
 	topic string
 }
 
-func (c *Consumer) Subscribe(cb api.Callback) error {
+func (c *Consumer) Subscribe(cb msg.Callback) error {
 	err := c.kafkaConsumer.Subscribe(c.topic, nil)
 	if err != nil {
 		return err
@@ -24,13 +27,22 @@ func (c *Consumer) Subscribe(cb api.Callback) error {
 
 	go func() {
 		for {
-			msg, err := c.kafkaConsumer.ReadMessage(0)
+			newMessage, err := c.kafkaConsumer.ReadMessage(-1)
 			if err != nil {
+				k := err.(kafka.Error)
+				if k.Code() == kafka.ErrTimedOut {
+					time.Sleep(10 * time.Second)
+					continue
+				}
+
 				log.Printf("Error reading message from %s, %v", c.topic, err)
-				continue
+
+				// if error is fatal, stop this go-routine
+				// TODO: Propagate error
+				break
 			}
 
-			cb(msg.Value)
+			cb(newMessage.Value)
 		}
 	}()
 

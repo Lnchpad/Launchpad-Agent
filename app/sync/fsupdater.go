@@ -23,7 +23,7 @@ type FsUpdater struct {
 	jobChannel chan Job
 }
 
-func NewFsUpdater(cfg FsUpdaterConfig) *FsUpdater {
+func NewFsUpdater(cfg FsUpdaterConfig) FsUpdater {
 	fs := FsUpdater{
 		cfg:        cfg,
 		jobChannel: make(chan Job, 100),
@@ -32,7 +32,7 @@ func NewFsUpdater(cfg FsUpdaterConfig) *FsUpdater {
 	// run the worker
 	go fs.start()
 
-	return &fs
+	return fs
 }
 
 func (fs *FsUpdater) EnqueueJob(job Job) {

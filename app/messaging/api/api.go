@@ -36,7 +36,15 @@ type BrokerConfig struct {
 
 type Callback func(message []byte)
 
+// An instance of a `MessageConsumer` represents a consumer of
+// a single topic.
 type MessageConsumer interface {
+
+	// Subscribes a callback function to a topic (represented by this MessageConsumer)
+	// Callback function will be invoked for every message received by the consumer
+	//
+	// Returns an error when there is an error in subscribing. Not when an error is encountered
+	// in the callback
 	Subscribe(cb Callback) error
 }
 

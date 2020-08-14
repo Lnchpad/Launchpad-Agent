@@ -6,6 +6,7 @@ import (
 	"cjavellana.me/launchpad/agent/app/messaging/api"
 	"cjavellana.me/launchpad/agent/app/servers"
 	"cjavellana.me/launchpad/agent/app/stats/collectors"
+	"cjavellana.me/launchpad/agent/app/sync"
 	"cjavellana.me/launchpad/agent/app/system"
 	"cjavellana.me/launchpad/agent/app/view"
 	"cjavellana.me/launchpad/agent/app/view/dashboard"
@@ -35,7 +36,16 @@ func (agent *Agent) Start() {
 	agent.initMessageBroker()
 	agent.initProbes()
 	agent.initLogsAndStatsCollector()
+	agent.initSyncListener()
 	agent.initView()
+}
+
+func (agent *Agent) initSyncListener(){
+	msgConsumer := agent.Broker.NewConsumer("gblevent")
+	fsUpdater := sync.NewFsUpdater(agent.AppCfg.FsUpdaterConfig)
+
+	p := sync.NewPortalEventListener(msgConsumer, fsUpdater)
+	p.StartListening()
 }
 
 func (agent *Agent) Terminate() {

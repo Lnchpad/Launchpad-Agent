@@ -3,6 +3,7 @@ package cfg
 import (
 	"bytes"
 	"cjavellana.me/launchpad/agent/app/messaging/api"
+	"cjavellana.me/launchpad/agent/app/sync"
 	"flag"
 	"github.com/go-yaml/yaml"
 	"html/template"
@@ -63,6 +64,9 @@ type AppConfig struct {
 
 	// messaging configurations
 	BrokerConfig api.BrokerConfig `yaml:"brokerconfig,omitempty"`
+
+	// The file system syncher configurations
+	FsUpdaterConfig sync.FsUpdaterConfig
 }
 
 func Get() AppConfig {
