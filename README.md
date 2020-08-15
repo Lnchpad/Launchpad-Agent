@@ -6,6 +6,8 @@ A daemon that runs in the webserver that is responsible for:
 1. Updating an application's static artifacts located in the webserver's public directory
 2. Running a websocket service that can broadcast `AppUpdateEvent` to the connected clients.
 
+## Architecture
+
 ## Motivation
 A `portal app` can be added, removed or updated anytime. The `Portal Platform` should be able to 
 handle these changes at runtime without affecting other `portal apps`.
@@ -52,6 +54,9 @@ This section describes the top-level packages and their purpose.
     ```
 
 ## Troubleshooting
+
+### Debugging on Docker
+Please refer to [this article](https://blog.jetbrains.com/go/2020/05/06/debugging-a-go-application-inside-a-docker-container/)
 
 ### MacOS
 Stop "developer tools access needs to take control of another process for debugging to continue" alert
