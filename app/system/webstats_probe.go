@@ -42,12 +42,13 @@ func (w *WebStatsProbe) Observe(observer TextObserver) {
 					o.Update(fmt.Sprintf("%s\n", err))
 				}
 			} else {
-				for _, o := range w.observers {
-					responseBody, err := read(resp)
-					if err != nil {
-						break
-					}
+				// Response can only be read once
+				responseBody, err := read(resp)
+				if err != nil {
+					break
+				}
 
+				for _, o := range w.observers {
 					o.Update(responseBody)
 				}
 			}
