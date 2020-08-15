@@ -40,9 +40,9 @@ func (agent *Agent) Start() {
 	agent.initView()
 }
 
-func (agent *Agent) initSyncListener(){
+func (agent *Agent) initSyncListener() {
 	msgConsumer := agent.Broker.NewConsumer("gblevent")
-	fsUpdater := sync.NewFsUpdater(agent.AppCfg.FsUpdaterConfig)
+	fsUpdater := sync.NewFsUpdater(agent.AppCfg.FsUpdaterConfig, &agent.Nginx)
 
 	p := sync.NewPortalEventListener(msgConsumer, fsUpdater)
 	p.StartListening()

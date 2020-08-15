@@ -4,6 +4,7 @@ import (
 	"cjavellana.me/launchpad/agent/app/cfg"
 	"cjavellana.me/launchpad/agent/app/system"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os/exec"
 )
@@ -21,15 +22,27 @@ type Nginx struct {
 
 	Status Status
 
-	serverCfg cfg.ServerConfig
+	ServerCfg cfg.ServerConfig
 }
 
 func NewNginx(cfg cfg.ServerConfig) Nginx {
-	return Nginx{serverCfg: cfg}
+	return Nginx{ServerCfg: cfg}
+}
+
+// returns an error if `p.appName` already exist
+func (n *Nginx) RegisterApp(p cfg.PortalApp) error {
+	for _, app := range n.ServerCfg.Applications {
+		if app.AppName == p.AppName {
+			return errors.New(fmt.Sprintf("App %s already exists", p.AppName))
+		}
+	}
+
+	return nil
 }
 
 func (n *Nginx) Start() error {
-	if err := n.createOrUpdateConfigFile(); err != nil {
+	err := n.rebuildAndUpdateConfig()
+	if err != nil {
 		return err
 	}
 
@@ -70,12 +83,22 @@ func (n *Nginx) Stop() error {
 	return nil
 }
 
-func (n *Nginx) createOrUpdateConfigFile() error {
-	return ioutil.WriteFile(n.serverCfg.ConfigLocation, []byte(n.serverCfg.ConfigTemplate), 0644)
+func (n *Nginx) Restart() error {
+	return nil
+}
+
+func (n *Nginx) rebuildAndUpdateConfig() error {
+	builder := newConfigBuilder(n.ServerCfg)
+	configString, _ := builder.Build()
+	return writeToFile(n.ServerCfg.ConfigLocation, configString)
+}
+
+func writeToFile(fileLocation string, config string) error {
+	return ioutil.WriteFile(fileLocation, []byte(config), 0644)
 }
 
 func (n *Nginx) getCmd() *exec.Cmd {
-	serverCfg := n.serverCfg
+	serverCfg := n.ServerCfg
 
 	switch serverCfg.ExecutablePath {
 	case "local":

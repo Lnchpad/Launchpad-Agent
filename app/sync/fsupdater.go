@@ -1,6 +1,10 @@
 package sync
 
-import "fmt"
+import (
+	"cjavellana.me/launchpad/agent/app/cfg"
+	"cjavellana.me/launchpad/agent/app/servers"
+	"log"
+)
 
 // The file system updater. This component is responsible for updating the
 // root directory. This component ensures that there is only a single thread
@@ -10,25 +14,18 @@ type Job struct {
 	AppName string
 }
 
-type FsUpdaterConfig struct {
-	// the location of all the static files in the
-	// local file system i.e. in the container
-	RootDirectory string
-
-	// the url of the nexus repository
-	NexusUrl string
-}
-
 type FsUpdater struct {
-	cfg FsUpdaterConfig
-
+	cfg cfg.FsUpdaterConfig
+	// channel used for sending job to this worker
 	jobChannel chan Job
+	nginx      *servers.Nginx
 }
 
-func NewFsUpdater(cfg FsUpdaterConfig) FsUpdater {
+func NewFsUpdater(cfg cfg.FsUpdaterConfig, nginx *servers.Nginx) FsUpdater {
 	fs := FsUpdater{
 		cfg:        cfg,
 		jobChannel: make(chan Job, 100),
+		nginx:      nginx,
 	}
 
 	// run the worker
@@ -43,6 +40,18 @@ func (fs *FsUpdater) EnqueueJob(job Job) {
 
 func (fs *FsUpdater) start() {
 	for job := range fs.jobChannel {
-		fmt.Println(job.AppName)
+
+		err := fs.nginx.RegisterApp(cfg.PortalApp{
+			AppName: job.AppName,
+		})
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		if err := fs.nginx.Restart(); err != nil {
+			// Error restarting nginx.
+			log.Fatalf("Unable to restart server %s %v", job.AppName, err)
+		}
 	}
 }
