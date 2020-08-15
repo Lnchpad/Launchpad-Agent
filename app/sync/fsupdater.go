@@ -49,8 +49,8 @@ func (fs *FsUpdater) start() {
 			return
 		}
 
-		if err := fs.nginx.Restart(); err != nil {
-			// Error restarting nginx.
+		err = fs.nginx.Restart()
+		if err != nil {
 			log.Fatalf("Unable to restart server %s %v", job.AppName, err)
 		}
 	}

@@ -1,7 +1,9 @@
-# Configuration File for Testing Locally
 apiversion: 1.0
 viewtype: dashboard-simple
-maxserieselements: 15
+maxserieselements: 10
+fsupdaterconfig:
+  rootdirectory: /usr/share/nginx/html
+  nexusurl: http://localhost:8081
 serverconfig:
   executablepath: /usr/sbin/nginx
   configlocation: /tmp/nginx.conf
@@ -32,7 +34,7 @@ serverconfig:
 
         keepalive_timeout  65;
 
-        gzip  on;
+        #gzip  on;
 
         server {
             listen 127.0.0.1:1337;
@@ -47,14 +49,8 @@ serverconfig:
             listen       80;
             server_name  localhost;
 
-            # charset koi8-r;
-            # access_log  /var/log/nginx/host.access.log  main;
-
-#            {{range .Apps}}
-#            location /api {
-#
-#            }
-#            {{end}}
+            #charset koi8-r;
+            #access_log  /var/log/nginx/host.access.log  main;
 
             location / {
                 root   {{.RootDirectory}};
@@ -69,15 +65,22 @@ serverconfig:
             location = /50x.html {
                 root   {{.RootDirectory}};
             }
+
+            # deny access to .htaccess files, if Apache's document root
+            # concurs with nginx's one
+            #
+            #location ~ /\.ht {
+            #    deny  all;
+            #}
         }
     }
 probeconfig:
   enabled: true
-  # The number of seconds between taking metrics
-  samplinginterval: 5
+  # In seconds
+  samplinginterval: 10
   webstatsconfig:
     statsurl: http://127.0.0.1:1337/nginx_status
-    # Number of seconds before the probe starts polling the statsurl endpoint
+    # Unit in seconds
     initialdelay: 10
   probetypes:
     - cpu
@@ -97,5 +100,9 @@ brokerconfig:
     logs:
       topic: launchpad.web.logs
   consumers:
-    app:
+    gblevent:
       topic: launchpad.app.deployment
+      # Consumer Group
+      group: web.agents
+      # Ignore previous messages. We only care about the latest
+      offsetreset: latest
