@@ -1,6 +1,6 @@
 # Launchpad Agent
 
-![](Launchpad-Agent.gif)
+![](Launchpad-Agent.png)
 
 A daemon that runs in the webserver that is responsible for:
 1. Updating an application's static artifacts located in the webserver's public directory
