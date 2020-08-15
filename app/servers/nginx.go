@@ -68,7 +68,6 @@ func (n *Nginx) Start() error {
 
 	n.Process = process
 
-	// no error
 	return nil
 }
 
@@ -84,7 +83,13 @@ func (n *Nginx) Stop() error {
 }
 
 func (n *Nginx) Restart() error {
-	return nil
+	err := n.rebuildAndUpdateConfig()
+	if err != nil {
+		return err
+	}
+
+	cmd := exec.Command(n.ServerCfg.ExecutablePath, "-s", "reload")
+	return cmd.Start()
 }
 
 func (n *Nginx) rebuildAndUpdateConfig() error {
