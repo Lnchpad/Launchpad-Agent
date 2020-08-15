@@ -2,6 +2,8 @@
 apiversion: 1.0
 viewtype: dashboard-simple
 maxserieselements: 5
+# The url of the gateway to proxy requests to
+gatewayurl: http://gateway:8000
 fsupdaterconfig:
   rootdirectory: /usr/share/nginx/html
   nexusurl: http://localhost:8081
