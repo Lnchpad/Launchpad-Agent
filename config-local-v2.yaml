@@ -80,7 +80,7 @@ serverconfig:
 probeconfig:
   enabled: true
   # In seconds
-  samplinginterval: 5
+  samplinginterval: 3
   webstatsconfig:
     statsurl: http://127.0.0.1:1337/nginx_status
     # Unit in seconds
@@ -104,7 +104,7 @@ brokerconfig:
       topic: launchpad.web.logs
   consumers:
     gblevent:
-      topic: launchpad.app.deployment
+      topic: launchpad.internal.deployment
       # Consumer Group
       group: web.agents
       # Ignore previous messages. We only care about the latest

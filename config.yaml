@@ -103,7 +103,7 @@ brokerconfig:
       topic: launchpad.web.logs
   consumers:
     gblevent:
-      topic: launchpad.app.deployment
+      topic: launchpad.internal.deployment
       # Consumer Group
       group: web.agents
       # Ignore previous messages. We only care about the latest
